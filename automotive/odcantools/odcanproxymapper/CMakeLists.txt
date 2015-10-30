@@ -51,15 +51,26 @@ FIND_PACKAGE (OpenDaVINCI REQUIRED)
 SET(AUTOMOTIVEDATA_DIR "${CMAKE_INSTALL_PREFIX}")
 FIND_PACKAGE (AutomotiveData REQUIRED)
 
+###########################################################################
+# Find CANMappingMessage.
+SET(CANMESSAGEMAPPING_DIR "${CMAKE_INSTALL_PREFIX}")
+FIND_PACKAGE (CANMessageMapping REQUIRED)
+
+###########################################################################
+# Set include directory to libodcantools.
+INCLUDE_DIRECTORIES (../libodcantools/include)
+# Link with libodcantools.
+SET (ODCANTOOLS_LIB odcantools-static)
+
 ###############################################################################
 # Set header files from OpenDaVINCI.
 INCLUDE_DIRECTORIES (${OPENDAVINCI_INCLUDE_DIRS}/opendavinci)
 # Set header files from AutomotiveData.
 INCLUDE_DIRECTORIES (${AUTOMOTIVEDATA_INCLUDE_DIRS}/automotivedata)
-# Set include directory from odcanmapper.
-INCLUDE_DIRECTORIES(${odcanmapper_SOURCE_DIR}/include)
 # Set include directory from odcanproxy.
 INCLUDE_DIRECTORIES(${odcanproxy_SOURCE_DIR}/include)
+# Set header files from CANMappingMessage.
+INCLUDE_DIRECTORIES (${CANMESSAGEMAPPING_INCLUDE_DIRS}/canmessagemapping)
 # Set header files from CAN driver.
 INCLUDE_DIRECTORIES (${CMAKE_INSTALL_PREFIX}/usr/include)
 # Set include directory.
@@ -67,10 +78,11 @@ INCLUDE_DIRECTORIES(include)
 
 ###########################################################################
 # Set linking libraries to successfully link test suites and binaries.
-SET (LIBRARIES ${odcanmapper_BINARY_DIR}/libodcanmapperlib-static.a
-               ${odcanproxy_BINARY_DIR}/libodcanproxylib-static.a
-               ${OPENDAVINCI_LIBRARIES}
+SET (LIBRARIES ${OPENDAVINCI_LIBRARIES}
                ${AUTOMOTIVEDATA_LIBRARIES}
+               ${CANMESSAGEMAPPING_LIBRARIES}
+               ${odcanproxy_BINARY_DIR}/libodcanproxylib-static.a
+               ${ODCANTOOLS_LIB}
                ${CMAKE_INSTALL_PREFIX}/usr/lib/libpcan.so)
 
 ###############################################################################
@@ -113,6 +125,6 @@ ENDIF(CXXTEST_FOUND)
 
 ###############################################################################
 # Install this project.
-INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin COMPONENT cantools)
-INSTALL(FILES man/${PROJECT_NAME}.1 DESTINATION man/man1 COMPONENT cantools)
+INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin COMPONENT odcantools)
+INSTALL(FILES man/${PROJECT_NAME}.1 DESTINATION man/man1 COMPONENT odcantools)
 

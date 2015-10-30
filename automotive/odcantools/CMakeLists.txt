@@ -17,7 +17,7 @@
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
-PROJECT (automotive)
+PROJECT (automotive.odcantools)
 
 ###########################################################################
 # Set the search path for .cmake files.
@@ -60,6 +60,7 @@ IF(    (UNIX)
 
         ###########################################################################
         # Add subdirectories.
+        ADD_SUBDIRECTORY (libodcantools)
         ADD_SUBDIRECTORY (odcanascreplay)
         ADD_SUBDIRECTORY (odcanproxy)
         ADD_SUBDIRECTORY (odcanmapper)

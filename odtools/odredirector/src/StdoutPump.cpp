@@ -116,7 +116,7 @@ namespace odredirector {
 
                     // Write the CompressedImage container to STDOUT.
                     core::data::Container c(core::data::Container::COMPRESSED_IMAGE, ci);
-                    cout << c;
+                    std::cout << c;
                 }
                 else {
                     cerr << "[odredirector]: Warning! Compressed image to large to fit in a UDP packet. Image skipped." << std::endl;
@@ -127,8 +127,9 @@ namespace odredirector {
             }
         }
         else {
-            cout << container;
+            std::cout << container;
         }
+
         std::cout.rdbuf()->pubsync();
         std::cout.flush();
     }

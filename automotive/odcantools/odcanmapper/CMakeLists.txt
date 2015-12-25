@@ -52,17 +52,25 @@ FIND_PACKAGE (OpenDaVINCI REQUIRED)
 SET(AUTOMOTIVEDATA_DIR "${CMAKE_INSTALL_PREFIX}")
 FIND_PACKAGE (AutomotiveData REQUIRED)
 
+###########################################################################
+# Find CANMappingMessage.
+SET(CANMESSAGEMAPPING_DIR "${CMAKE_INSTALL_PREFIX}")
+FIND_PACKAGE (CANMessageMapping REQUIRED)
+
 ###############################################################################
 # Set header files from OpenDaVINCI.
 INCLUDE_DIRECTORIES (${OPENDAVINCI_INCLUDE_DIRS}/opendavinci)
 # Set header files from AutomotiveData.
 INCLUDE_DIRECTORIES (${AUTOMOTIVEDATA_INCLUDE_DIRS}/automotivedata)
+# Set header files from CANMappingMessage.
+INCLUDE_DIRECTORIES (${CANMESSAGEMAPPING_INCLUDE_DIRS}/canmessagemapping)
 # Set include directory.
 INCLUDE_DIRECTORIES(include)
 
 ###########################################################################
 # Set linking libraries to successfully link test suites and binaries.
 SET (LIBRARIES ${OPENDAVINCI_LIBRARIES}
+               ${CANMESSAGEMAPPING_LIBRARIES}
                ${AUTOMOTIVEDATA_LIBRARIES})
 
 ###############################################################################
@@ -105,6 +113,6 @@ ENDIF(CXXTEST_FOUND)
 
 ###############################################################################
 # Install this project.
-INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin COMPONENT cantools)
-INSTALL(FILES man/${PROJECT_NAME}.1 DESTINATION man/man1 COMPONENT cantools)
+INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin COMPONENT odcantools)
+INSTALL(FILES man/${PROJECT_NAME}.1 DESTINATION man/man1 COMPONENT odcantools)
 

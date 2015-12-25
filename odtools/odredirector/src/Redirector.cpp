@@ -23,6 +23,7 @@
 
 #include "jpeglib.h"
 
+#include "core/base/QueryableNetstringsDeserializerABCF.h"
 #include "core/data/Container.h"
 #include "core/base/CommandLineParser.h"
 #include "core/wrapper/SharedMemory.h"
@@ -103,11 +104,16 @@ namespace odredirector {
 
         while (getModuleStateAndWaitForRemainingTimeInTimeslice() == coredata::dmcp::ModuleStateMessage::RUNNING) {
             if (m_fromstdin) {
+                // Please note that reading from stdin does not evaluate sending latencies.
                 while (cin.good()) {
-                    Container c;
-                    cin >> c;
+                    // Buffer from cin.
+                    stringstream containerBuffer;
+                    // Fill buffer.
+                    QueryableNetstringsDeserializerABCF::fillBuffer(cin, containerBuffer);
 
-                    // Please note that reading from stin does not evaluate sending latencies.
+                    // Decode container from buffer.
+                    Container c;
+                    containerBuffer >> c;
 
                     // Compressed images are transformed into regular shared images again.
                     if (c.getDataType() == Container::COMPRESSED_IMAGE) {
@@ -174,6 +180,7 @@ namespace odredirector {
                         si.setWidth(ci.getWidth());
                         si.setHeight(ci.getHeight());
                         si.setBytesPerPixel(ci.getBytesPerPixel());
+                        si.setSize(ci.getWidth() * ci.getHeight() * ci.getBytesPerPixel());
 
                         // Distribute the SharedImage information in the UDP multicast session.
                         Container c2(Container::SHARED_IMAGE, si);

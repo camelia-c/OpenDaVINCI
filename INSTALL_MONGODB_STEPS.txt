@@ -1,0 +1,84 @@
+INSTALL MONGODB AND ITS C/C++ DRIVERS ON UBUNTU 14.04
+=====================================================
+
+(according to https://github.com/mongodb/mongo-cxx-driver/wiki/Quickstart-Guide-%28New-Driver%29)
+
+
+wget https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-ubuntu1404-3.2.3.tgz
+mv mongodb-linux-x86_64-ubuntu1404-3.2.3.tgz /home/camelia/Documents
+cd ~/Documents
+tar -xzvf mongodb-linux-x86_64-ubuntu1404-3.2.3.tgz
+mv mongodb-linux-x86_64-ubuntu1404-3.2.3 MONGODB
+cd MONGODB
+sudo apt-get install automake autoconf libtool 
+
+git clone -b r1.3 https://github.com/mongodb/mongo-c-driver
+cd mongo-c-driver
+mkdir -p /home/camelia/Documents/MYCDRIVER
+./autogen.sh --prefix=/home/camelia/Documents/MYCDRIVER
+make && sudo make install
+
+[info:  Libraries have been installed in:
+   /home/camelia/Documents/MYCDRIVER/lib]
+
+cd ..
+
+git clone -b master https://github.com/mongodb/mongo-cxx-driver
+cd mongo-cxx-driver/build
+PKG_CONFIG_PATH=/home/camelia/Documents/MYCDRIVER/lib/pkgconfig cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
+
+[error:  CMake 3.2 or higher is required.  You are running version 2.8.12.2
+   -- Configuring incomplete, errors occurred!]
+
+sudo add-apt-repository ppa:george-edison55/cmake-3.x
+sudo apt-get update
+sudo apt-get install cmake
+
+PKG_CONFIG_PATH=/home/camelia/Documents/MYCDRIVER/lib/pkgconfig cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local ..
+sudo make && sudo make install
+
+
+-----------------------------------------------------------
+(in a different terminal)
+camelia@dell:~/Documents/MONGODB$ mkdir -p ./data/db
+camelia@dell:~/Documents/MONGODB/bin$ ./mongod --dbpath /home/camelia/Documents/MONGODB/data/db
+
+------------------------------------------------------------
+
+
+
+export PKG_CONFIG_PATH=/home/camelia/Documents/MYCDRIVER/lib/pkgconfig
+
+c++ --std=c++11 testmongo.cpp -o testmongo $(pkg-config --cflags --libs libmongocxx)
+
+export LD_LIBRARY_PATH=/home/camelia/Documents/MONGODB/mongo-cxx-driver/build/src/mongocxx:/home/camelia/Documents/MONGODB/mongo-cxx-driver/build/src/bsoncxx
+
+./testmongo 
+Output:
+{
+    "_id" : {
+        "$oid" : "56cafbe6a3d24b34791c8b41"
+    }, 
+    "hello" : "world"
+}
+
+
+./testmongo 
+Output:
+{
+    "_id" : {
+        "$oid" : "56cafbe6a3d24b34791c8b41"
+    }, 
+    "hello" : "world"
+}
+{
+    "_id" : {
+        "$oid" : "56cafc36a3d24b350a2d8421"
+    }, 
+    "hello" : "world"
+}
+
+
+
+
+

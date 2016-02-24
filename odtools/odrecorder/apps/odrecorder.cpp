@@ -17,9 +17,53 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <string>
 #include "RecorderModule.h"
+#include "core/base/CommandLineArgument.h"
+#include "core/base/CommandLineParser.h"
+
 
 int32_t main(int32_t argc, char **argv) {
-    odrecorder::RecorderModule r(argc, argv);
-    return r.runModule();
+
+    // we parse the command line arguments to see what recorder to launch: file or database
+    core::base::CommandLineParser cmdParser;
+    cmdParser.addCommandLineArgument("id");
+    cmdParser.addCommandLineArgument("cid");
+    cmdParser.addCommandLineArgument("freq");
+    cmdParser.addCommandLineArgument("verbose");
+    cmdParser.addCommandLineArgument("profiling");
+    cmdParser.addCommandLineArgument("realtime");
+    cmdParser.addCommandLineArgument("recorderdest");
+
+    cmdParser.parse(argc, argv);
+
+    core::base::CommandLineArgument cmdArgumentID = cmdParser.getCommandLineArgument("id");
+    core::base::CommandLineArgument cmdArgumentCID = cmdParser.getCommandLineArgument("cid");
+    core::base::CommandLineArgument cmdArgumentFREQ = cmdParser.getCommandLineArgument("freq");
+    core::base::CommandLineArgument cmdArgumentVERBOSE = cmdParser.getCommandLineArgument("verbose");
+    core::base::CommandLineArgument cmdArgumentPROFILING = cmdParser.getCommandLineArgument("profiling");
+    core::base::CommandLineArgument cmdArgumentREALTIME = cmdParser.getCommandLineArgument("realtime");
+    core::base::CommandLineArgument cmdArgumentRECORDERDEST = cmdParser.getCommandLineArgument("recorderdest");
+    
+    if (cmdArgumentRECORDERDEST.isSet()) {
+        std::string value = cmdArgumentRECORDERDEST.getValue<std::string>();
+        std::string fileval ("file");
+        std::string dbval ("database");
+
+        if (value.compare(dbval) == 0){
+             //have a database recorder, as requested
+             odrecorder::DBRecorderModule r(argc, argv);
+             return r.runModule();
+        }
+        else{
+             //have a file recorder, as default even for misspelled or wrong options
+             odrecorder::RecorderModule r(argc, argv);
+             return r.runModule();
+        }
+    }
+    else{
+        // by default have a file recorder
+	odrecorder::RecorderModule r(argc, argv);
+        return r.runModule();
+    }    
 }

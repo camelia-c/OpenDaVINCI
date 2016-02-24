@@ -74,6 +74,49 @@ namespace odrecorder {
             virtual void tearDown();
     };
 
+    class DBRecorderModule : public core::base::module::TimeTriggeredConferenceClientModule {
+        private:
+            /**
+             * "Forbidden" copy constructor. Goal: The compiler should warn
+             * already at compile time for unwanted bugs caused by any misuse
+             * of the copy constructor.
+             *
+             * @param obj Reference to an object of this class.
+             */
+            DBRecorderModule(const DBRecorderModule &/*obj*/);
+
+            /**
+             * "Forbidden" assignment operator. Goal: The compiler should warn
+             * already at compile time for unwanted bugs caused by any misuse
+             * of the assignment operator.
+             *
+             * @param obj Reference to an object of this class.
+             * @return Reference to this instance.
+             */
+            DBRecorderModule& operator=(const DBRecorderModule &/*obj*/);
+
+        public:
+            /**
+             * Constructor.
+             *
+             * @param argc Number of command line arguments.
+             * @param argv Command line arguments.
+             */
+            DBRecorderModule(const int32_t &argc, char **argv);
+
+            virtual ~DBRecorderModule();
+
+            virtual void wait();
+
+            coredata::dmcp::ModuleExitCodeMessage::ModuleExitCode body();
+
+        private:
+            virtual void setUp();
+
+            virtual void tearDown();
+    };
+
+
 } // odrecorder
 
 #endif /*RECORDERMODULE_H_*/

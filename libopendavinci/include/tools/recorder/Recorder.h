@@ -122,3 +122,4 @@ class SharedDataListener;
 } // tools
 
 #endif /*OPENDAVINCI_TOOLS_RECORDER_RECORDER_H_*/
+

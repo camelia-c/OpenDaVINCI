@@ -21,7 +21,7 @@
 #include <iostream>
 #include "RecorderModule.h"
 #include "core/base/Thread.h"
-#include "tools/recorder/DBRecorder.h"
+#include "tools/dbrecorder/DBRecorder.h"
 #include "tools/recorder/SharedDataListener.h"
 #include "generated/coredata/recorder/RecorderCommand.h"
 
@@ -33,6 +33,7 @@ namespace odrecorder {
     using namespace core::base;
     using namespace core::data;
     using namespace core::io;
+    using namespace tools::dbrecorder;
     using namespace tools::recorder;
 
     DBRecorderModule::DBRecorderModule(const int32_t &argc, char **argv) :
@@ -55,7 +56,7 @@ namespace odrecorder {
         // database, e.g. testdb , to be read from the configuration file
         const string recorderOutputDB = getKeyValueConfiguration().getValue<string>("odrecorder.outputDB");
         std::cout<< "In DBRecorderModule the outputDB is: " << recorderOutputDB << "\n";
-
+	
         // Size of memory segments.
         const uint32_t MEMORY_SEGMENT_SIZE = getKeyValueConfiguration().getValue<uint32_t>("global.buffer.memorySegmentSize");
         // Number of memory segments.
@@ -66,14 +67,16 @@ namespace odrecorder {
         const bool DUMP_SHARED_DATA = getKeyValueConfiguration().getValue<uint32_t>("odrecorder.dumpshareddata") == 1;
 
         // Actual "recording" interface.
-        DBRecorder r(recorderOutputDB, MEMORY_SEGMENT_SIZE, NUMBER_OF_SEGMENTS, THREADING, DUMP_SHARED_DATA);
+        std::cout << "Will create DBRecorder" << "\n";
+        DBRecorder dbr(recorderOutputDB, MEMORY_SEGMENT_SIZE, NUMBER_OF_SEGMENTS, THREADING, DUMP_SHARED_DATA);
+        std::cout << "DBRecorder successfully created" << "\n";
 
         // Connect recorder's FIFOQueue to record all containers except for shared images/shared data.
-        addDataStoreFor(r.getFIFO());
+        addDataStoreFor(dbr.getFIFO());
 
         // Connect recorder's data store that can handle shared data.
-        addDataStoreFor(Container::SHARED_DATA, r.getDataStoreForSharedData());
-        addDataStoreFor(Container::SHARED_IMAGE, r.getDataStoreForSharedData());
+        addDataStoreFor(Container::SHARED_DATA, dbr.getDataStoreForSharedData());
+        addDataStoreFor(Container::SHARED_IMAGE, dbr.getDataStoreForSharedData());
 
         // Get key/value-datastore for controlling the odrecorder.
         KeyValueDataStore &kvds = getKeyValueDataStore();
@@ -83,8 +86,8 @@ namespace odrecorder {
         while (getModuleStateAndWaitForRemainingTimeInTimeslice() == coredata::dmcp::ModuleStateMessage::RUNNING) {
             // Recording queued entries.
             if (recording) {
-                if (!r.getFIFO().isEmpty()) {
-                    r.recordQueueEntries();
+                if (!dbr.getFIFO().isEmpty()) {
+                    dbr.recordQueueEntries();
                 }
                 else {
                     Thread::usleepFor(500);
@@ -103,7 +106,7 @@ namespace odrecorder {
 
                 // Discard existing entries.
                 if (!recording) {
-                    r.getFIFO().clear();
+                    dbr.getFIFO().clear();
                 }
             }
         }

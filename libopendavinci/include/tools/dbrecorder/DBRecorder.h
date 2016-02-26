@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef OPENDAVINCI_TOOLS_RECORDER_RECORDER_H_
-#define OPENDAVINCI_TOOLS_RECORDER_RECORDER_H_
+#ifndef OPENDAVINCI_TOOLS_DBRECORDER_DBRECORDER_H_
+#define OPENDAVINCI_TOOLS_DBRECORDER_DBRECORDER_H_
 
 #include <memory>
 #include <string>
@@ -26,15 +26,16 @@
 #include "core/opendavinci.h"
 #include "core/SharedPointer.h"
 #include "core/base/FIFOQueue.h"
+#include "tools/recorder/SharedDataListener.h"
+	
 
 namespace core { namespace data { class Container; } }
 
 namespace tools {
-    namespace recorder {
-
-class SharedDataListener;
+    namespace dbrecorder {
 
         using namespace std;
+        using namespace tools::recorder;
 
         /**
          * This class is the interface to use the recorder module from within other modules.s
@@ -118,8 +119,8 @@ class SharedDataListener;
                 bool m_dumpSharedData;
         };
 
-    } // recorder
+    } // dbrecorder
 } // tools
 
-#endif /*OPENDAVINCI_TOOLS_RECORDER_RECORDER_H_*/
+#endif /*OPENDAVINCI_TOOLS_DBRECORDER_DBRECORDER_H_*/
 

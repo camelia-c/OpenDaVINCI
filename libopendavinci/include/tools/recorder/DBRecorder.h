@@ -27,12 +27,17 @@
 #include "core/SharedPointer.h"
 #include "core/base/FIFOQueue.h"
 #include "tools/recorder/SharedDataListener.h"
+
+#include <bsoncxx/builder/stream/document.hpp>
+#include <bsoncxx/json.hpp>
+#include <mongocxx/client.hpp>
+#include <mongocxx/instance.hpp>
 	
 
 namespace core { namespace data { class Container; } }
 
 namespace tools {
-    namespace dbrecorder {
+    namespace recorder {
 
         using namespace std;
         using namespace tools::recorder;
@@ -117,6 +122,8 @@ namespace tools {
                 core::SharedPointer<ostream> m_out;
                 core::SharedPointer<ostream> m_outSharedMemoryFile;
                 bool m_dumpSharedData;
+                std::string targetdbname;
+                mongocxx::client conn;
         };
 
     } // dbrecorder

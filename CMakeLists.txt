@@ -168,6 +168,27 @@ IF(${BUILD_ODDATASTRUCTUREGENERATOR})
 ENDIF()
 
 # Next, build libopendavinci.
+
+#added for MongoDB
+SET(ENV{PKG_CONFIG_PATH} "/home/camelia/Documents/MYCDRIVER/lib/pkgconfig")
+find_package(PkgConfig REQUIRED)
+
+pkg_search_module(MONGO REQUIRED libmongocxx)
+
+#message(SEND_ERROR "A ${MONGO_FOUND}")        # Error:A 1
+#message(SEND_ERROR "B ${MONGO_LIBRARIES}")    # Error:B mongocxx;bsoncxx
+#message(SEND_ERROR "C ${MONGO_LIBRARY_DIRS}") # Error:C /usr/local/lib
+#message(SEND_ERROR "D ${MONGO_LDFLAGS}")      # Error:D -L/usr/local/lib;-lmongocxx;-lbsoncxx
+#message(SEND_ERROR "E ${MONGO_LDFLAGS_OTHER}")# Error:E
+#message(SEND_ERROR "F ${MONGO_INCLUDE_DIRS}") # Error:F /home/camelia/Documents/MYCDRIVER/include/libbson-1.0;/home/camelia/Documents/MYCDRIVER/include/libmongoc-1.0;/usr/local/include/mongocxx/v_noabi;/usr/local/include/bsoncxx/v_noabi
+#message(SEND_ERROR "G ${MONGO_CFLAGS}")       # Error:G -I/home/camelia/Documents/MYCDRIVER/include/libbson-1.0;-I/home/camelia/Documents/MYCDRIVER/include/libmongoc-1.0;-I/usr/local/include/mongocxx/v_noabi;-I/usr/local/include/bsoncxx/v_noabi
+#message(SEND_ERROR "H ${MONGO_CFLAGS_OTHER}") # Error:H
+
+
+include_directories(${MONGO_INCLUDE_DIRS})
+include_directories(${MONGO_LIBRARY_DIRS})
+#end added for MongoDB
+
 IF(${BUILD_OPENDAVINCI})
     ExternalProject_Add (libopendavinci
         DEPENDS odDataStructureGenerator
@@ -176,9 +197,14 @@ IF(${BUILD_OPENDAVINCI})
         SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libopendavinci"
         CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}"
         CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE}"
+        #CMAKE_ARGS "-lmongocxx -lbsoncxx"
         TEST_BEFORE_INSTALL 1
         TEST_COMMAND ${CMAKE_CTEST_COMMAND} ${CTEST_PARAMETERS}
+        #add_executable(sorting ${SOURCE_FILES})
+        #target_link_libraries(libopendavinci ${MONGO_LIBRARIES})
+        #INSTALL_COMMAND ${CMAKE_COMMAND} ${MONGO_CFLAGS} ${MONGO_LDFLAGS} --build ${CMAKE_CURRENT_BINARY_DIR}/libopendavinci-prefix/src/libopendavinci-build --target install COMMAND ${CMAKE_COMMAND} ${MONGO_CFLAGS} ${MONGO_LDFLAGS} --build ${CMAKE_CURRENT_BINARY_DIR}/libopendavinci-prefix/src/libopendavinci-build --target ${MAKE_PACKAGE})
         INSTALL_COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/libopendavinci-prefix/src/libopendavinci-build --target install COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/libopendavinci-prefix/src/libopendavinci-build --target ${MAKE_PACKAGE})
+
 
     # Build the reference projects in odDataStructureGenerator to check validity of the code generator.
     ExternalProject_Add (odDataStructureGenerator-reference

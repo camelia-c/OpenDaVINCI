@@ -21,7 +21,7 @@
 #include <iostream>
 #include "RecorderModule.h"
 #include "core/base/Thread.h"
-#include "tools/dbrecorder/DBRecorder.h"
+#include "tools/recorder/DBRecorder.h"
 #include "tools/recorder/SharedDataListener.h"
 #include "generated/coredata/recorder/RecorderCommand.h"
 
@@ -33,7 +33,6 @@ namespace odrecorder {
     using namespace core::base;
     using namespace core::data;
     using namespace core::io;
-    using namespace tools::dbrecorder;
     using namespace tools::recorder;
 
     DBRecorderModule::DBRecorderModule(const int32_t &argc, char **argv) :

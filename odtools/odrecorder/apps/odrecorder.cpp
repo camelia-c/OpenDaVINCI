@@ -17,15 +17,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+
 #include <string>
 #include "RecorderModule.h"
 #include "core/base/CommandLineArgument.h"
 #include "core/base/CommandLineParser.h"
 
-
+/*
+#include "core/dmcp/connection/Client.h"
+#include "core/dmcp/discoverer/Client.h"
+#include "core/exceptions/Exceptions.h"
+#include "generated/coredata/dmcp/ModuleDescriptor.h"
+#include "generated/coredata/dmcp/ModuleStateMessage.h"
+*/
 int32_t main(int32_t argc, char **argv) {
-
+    //initial version
     // we parse the command line arguments to see what recorder to launch: file or database
+    
     core::base::CommandLineParser cmdParser;
     cmdParser.addCommandLineArgument("id");
     cmdParser.addCommandLineArgument("cid");
@@ -34,9 +42,7 @@ int32_t main(int32_t argc, char **argv) {
     cmdParser.addCommandLineArgument("profiling");
     cmdParser.addCommandLineArgument("realtime");
     cmdParser.addCommandLineArgument("recorderdest");
-
     cmdParser.parse(argc, argv);
-
     core::base::CommandLineArgument cmdArgumentID = cmdParser.getCommandLineArgument("id");
     core::base::CommandLineArgument cmdArgumentCID = cmdParser.getCommandLineArgument("cid");
     core::base::CommandLineArgument cmdArgumentFREQ = cmdParser.getCommandLineArgument("freq");
@@ -49,7 +55,6 @@ int32_t main(int32_t argc, char **argv) {
         std::string value = cmdArgumentRECORDERDEST.getValue<std::string>();
         std::string fileval ("file");
         std::string dbval ("database");
-
         if (value.compare(dbval) == 0){
              //have a database recorder, as requested
              odrecorder::DBRecorderModule r(argc, argv);
@@ -65,5 +70,37 @@ int32_t main(int32_t argc, char **argv) {
         // by default have a file recorder
 	odrecorder::RecorderModule r(argc, argv);
         return r.runModule();
-    }    
+    }
+   
+
+   /*ModuleDescriptor md(getName(), getIdentifier(), myVersion, getFrequency());
+   try {
+            // Try to get configuration from DMCP server.
+            m_dmcpClient = SharedPointer<connection::Client>(new connection::Client(md, m_serverInformation));
+            m_dmcpClient->setSupercomponentStateListener(this);
+            m_dmcpClient->initialize();
+
+            // Get configuration from DMCP client.
+            m_keyValueConfiguration KeyValueConfiguration(); 
+            m_keyValueConfiguration = m_dmcpClient->getConfiguration();
+        } catch (ConnectException& e) {
+            CLOG1 << "(ClientModule) connecting to supercomponent failed: " << e.getMessage() << endl;
+            return coredata::dmcp::ModuleExitCodeMessage::SERIOUS_ERROR;
+        }
+   
+   const std::string value = m_keyValueConfiguration.getValue<std::string>("odrecorder.recorderdest");
+   std::string fileval ("file");
+   std::string dbval ("database");
+   if (value.compare(dbval) == 0){
+	     //have a database recorder, as requested
+	     odrecorder::DBRecorderModule r(argc, argv);
+	     return r.runModule();
+    }
+    else{
+	     //have a file recorder, as default even for misspelled or wrong options
+	     odrecorder::RecorderModule r(argc, argv);
+	     return r.runModule();
+    }  
+    */
+
 }

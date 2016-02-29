@@ -24,7 +24,7 @@
 #include "core/data/Container.h"
 #include "core/io/StreamFactory.h"
 #include "core/opendavinci.h"
-#include "tools/dbrecorder/DBRecorder.h"
+#include "tools/recorder/DBRecorder.h"
 #include "tools/recorder/SharedDataListener.h"
 
 #include <bsoncxx/builder/stream/document.hpp>
@@ -33,7 +33,7 @@
 #include <mongocxx/instance.hpp>
 
 namespace tools {
-    namespace dbrecorder {
+    namespace recorder {
 
 	using namespace std;
 	using namespace core::base;
@@ -51,10 +51,11 @@ namespace tools {
 	    // Get database name
 	    const string dbname(dname); 
 	    cout << "In DBRecorder the dbname is: " << dbname << "\n";
+            targetdbname(dname);
             
             //connect to the database
             mongocxx::instance inst{};
-            mongocxx::client conn{mongocxx::uri{}};
+            conn{mongocxx::uri{}};
             bsoncxx::builder::stream::document document{};
             auto collection = conn[dbname]["testcollection"];
             //this is just to ensure that it can read documents fine from MongoDB
@@ -104,7 +105,7 @@ namespace tools {
 	}
 
 	void DBRecorder::recordQueueEntries() {
-            auto collection = conn[dbname]["testcollection"];
+            auto collection = conn[targetdbname]["testcollection"];
 	    if (!m_fifo.isEmpty()) {
 		uint32_t numberOfEntries = m_fifo.getSize();
 		for (uint32_t i = 0; i < numberOfEntries; i++) {
@@ -117,7 +118,7 @@ namespace tools {
 
                           document << "hello" << "world";
                           collection.insert_one(document.view());
-
+                          
 		          //TODO take fields from c
 		     }//if
 		}//for

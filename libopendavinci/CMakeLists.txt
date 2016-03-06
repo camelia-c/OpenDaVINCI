@@ -19,6 +19,29 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
 PROJECT (libopendavinci)
 
+#########################################################################
+#added for MongoDB
+SET(ENV{PKG_CONFIG_PATH} "/home/camelia/Documents/MYCDRIVER/lib/pkgconfig")
+find_package(PkgConfig REQUIRED)
+
+pkg_search_module(MONGO REQUIRED libmongocxx)
+
+#message(SEND_ERROR "A ${MONGO_FOUND}")        # Error:A 1
+#message(SEND_ERROR "B ${MONGO_LIBRARIES}")    # Error:B mongocxx;bsoncxx
+#message(SEND_ERROR "C ${MONGO_LIBRARY_DIRS}") # Error:C /usr/local/lib
+#message(SEND_ERROR "D ${MONGO_LDFLAGS}")      # Error:D -L/usr/local/lib;-lmongocxx;-lbsoncxx
+#message(SEND_ERROR "E ${MONGO_LDFLAGS_OTHER}")# Error:E
+#message(SEND_ERROR "F ${MONGO_INCLUDE_DIRS}") # Error:F /home/camelia/Documents/MYCDRIVER/include/libbson-1.0;/home/camelia/Documents/MYCDRIVER/include/libmongoc-1.0;/usr/local/include/mongocxx/v_noabi;/usr/local/include/bsoncxx/v_noabi
+#message(SEND_ERROR "G ${MONGO_CFLAGS}")       # Error:G -I/home/camelia/Documents/MYCDRIVER/include/libbson-1.0;-I/home/camelia/Documents/MYCDRIVER/include/libmongoc-1.0;-I/usr/local/include/mongocxx/v_noabi;-I/usr/local/include/bsoncxx/v_noabi
+#message(SEND_ERROR "H ${MONGO_CFLAGS_OTHER}") # Error:H
+
+
+include_directories(${MONGO_INCLUDE_DIRS})
+#include_directories(${MONGO_LIBRARY_DIRS})
+#end added for MongoDB
+
+
+
 ###########################################################################
 # Set the search path for .cmake files.
 SET (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake.Modules" ${CMAKE_MODULE_PATH})
@@ -48,7 +71,7 @@ FIND_PACKAGE (LibRT)
 IF(    (LIBRT_FOUND)
    AND ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux") )
     MESSAGE(STATUS "Using RT on Linux for libopendavinci.")
-    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_LINUX_RT")
+    SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_LINUX_RT -std=c++11") #added for MongoDB -std=c++11
 ENDIF()
 
 ###########################################################################
@@ -98,7 +121,7 @@ ADD_CUSTOM_TARGET(GenerateDataStructures DEPENDS ${CMAKE_BINARY_DIR}/coredata/in
 # Set linking libraries to successfully link test suite binaries.
 SET (LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 IF(LIBRT_FOUND)
-    SET(LIBRARIES ${LIBRARIES} ${LIBRT_LIBRARIES})
+    SET(LIBRARIES ${LIBRARIES} ${LIBRT_LIBRARIES} ${MONGO_LDFLAGS}) #added MongoDB
 ENDIF()
 
 # Add CoreFoundation and IOKit on Mac OS X.

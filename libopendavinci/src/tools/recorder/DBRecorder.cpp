@@ -51,11 +51,11 @@ namespace tools {
 	    // Get database name
 	    const string dbname(dname); 
 	    cout << "In DBRecorder the dbname is: " << dbname << "\n";
-            targetdbname(dname);
+            //targetdbname(dname);
             
             //connect to the database
             mongocxx::instance inst{};
-            conn{mongocxx::uri{}};
+            mongocxx::client conn{mongocxx::uri{}};
             bsoncxx::builder::stream::document document{};
             auto collection = conn[dbname]["testcollection"];
             //this is just to ensure that it can read documents fine from MongoDB
@@ -105,6 +105,7 @@ namespace tools {
 	}
 
 	void DBRecorder::recordQueueEntries() {
+            mongocxx::client conn{mongocxx::uri{}};
             auto collection = conn[targetdbname]["testcollection"];
 	    if (!m_fifo.isEmpty()) {
 		uint32_t numberOfEntries = m_fifo.getSize();
@@ -116,6 +117,8 @@ namespace tools {
 		         (c.getDataType() != Container::SHARED_DATA)  &&
 		         (c.getDataType() != Container::SHARED_IMAGE) ) {
 
+			  bsoncxx::builder::stream::document document{};
+
                           document << "hello" << "world";
                           collection.insert_one(document.view());
                           
@@ -125,7 +128,7 @@ namespace tools {
 		
 	    }//if
 	}
-
-} // dbrecorder
+   
+  } // dbrecorder
 } // tools
 

@@ -58,6 +58,7 @@ ENDIF()
 
 ###########################################################################
 # Artifacts based on OpenDaVINCI need to link against a threading library.
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE) #added MongoDB error 
 FIND_PACKAGE (Threads REQUIRED)
 FIND_PACKAGE (LibRT)
 IF(    (LIBRT_FOUND)

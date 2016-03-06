@@ -19,6 +19,31 @@ CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
 PROJECT (odrecorder)
 
+#########################################################################
+#added for MongoDB
+SET(ENV{PKG_CONFIG_PATH} "/home/camelia/Documents/MYCDRIVER/lib/pkgconfig")
+find_package(PkgConfig REQUIRED)
+
+pkg_search_module(MONGO REQUIRED libmongocxx)
+
+#message(SEND_ERROR "A ${MONGO_FOUND}")        # Error:A 1
+#message(SEND_ERROR "B ${MONGO_LIBRARIES}")    # Error:B mongocxx;bsoncxx
+#message(SEND_ERROR "C ${MONGO_LIBRARY_DIRS}") # Error:C /usr/local/lib
+#message(SEND_ERROR "D ${MONGO_LDFLAGS}")      # Error:D -L/usr/local/lib;-lmongocxx;-lbsoncxx
+#message(SEND_ERROR "E ${MONGO_LDFLAGS_OTHER}")# Error:E
+#message(SEND_ERROR "F ${MONGO_INCLUDE_DIRS}") # Error:F /home/camelia/Documents/MYCDRIVER/include/libbson-1.0;/home/camelia/Documents/MYCDRIVER/include/libmongoc-1.0;/usr/local/include/mongocxx/v_noabi;/usr/local/include/bsoncxx/v_noabi
+#message(SEND_ERROR "G ${MONGO_CFLAGS}")       # Error:G -I/home/camelia/Documents/MYCDRIVER/include/libbson-1.0;-I/home/camelia/Documents/MYCDRIVER/include/libmongoc-1.0;-I/usr/local/include/mongocxx/v_noabi;-I/usr/local/include/bsoncxx/v_noabi
+#message(SEND_ERROR "H ${MONGO_CFLAGS_OTHER}") # Error:H
+
+
+#include_directories(${MONGO_INCLUDE_DIRS})
+#include_directories(${MONGO_LIBRARY_DIRS})
+#end added for MongoDB
+
+
+###########################################################################
+
+
 ###########################################################################
 # Set the search path for .cmake files.
 SET (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake.Modules" ${CMAKE_MODULE_PATH})
@@ -35,6 +60,10 @@ ENDIF()
 ###########################################################################
 # Include flags for compiling.
 INCLUDE (CompileFlags)
+#message(SEND_ERROR "--------------------------------------------------------------- ${CMAKE_CXX_FLAGS}") # here it sees -std=c++11
+SET (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}) # this gives error in  Performing build step for 'odtools', [ 50%] Building CXX object odrecorder/CMakeFiles/odrecorderlib-static.dir/src/DBRecorderModule.cpp.o -> requires -std=c++11 or -std=gnu++11 compiler options
+SET (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11") #this gives other error, afterwards, in Scanning dependencies of target odrecorderlib-static , [ 50%] Building CXX object odrecorder/CMakeFiles/odrecorderlib-static.dir/src/RecorderModule.cpp.o  --> c++: fatal error: no input files , compilation terminated. , /bin/sh: 1: -std=c++11: not found
+
 
 ###########################################################################
 # Find and configure CxxTest.
@@ -51,6 +80,8 @@ FIND_PACKAGE (OpenDaVINCI REQUIRED)
 INCLUDE_DIRECTORIES (${OPENDAVINCI_INCLUDE_DIRS}/opendavinci)
 # Set include directory.
 INCLUDE_DIRECTORIES(include)
+#for MongoDB
+include_directories(${MONGO_INCLUDE_DIRS})
 
 ###############################################################################
 # Build this project.

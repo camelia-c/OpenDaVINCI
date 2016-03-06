@@ -20,11 +20,26 @@ IF(WIN32)
 ENDIF()
 
 IF(UNIX)
+    #added for MongoDB
+    SET(ENV{PKG_CONFIG_PATH} "/home/camelia/Documents/MYCDRIVER/lib/pkgconfig")
+    find_package(PkgConfig REQUIRED)
+    pkg_search_module(MONGO REQUIRED libmongocxx)
+
+    #message(SEND_ERROR "A ${MONGO_FOUND}")        # Error:A 1
+    #message(SEND_ERROR "B ${MONGO_LIBRARIES}")    # Error:B mongocxx;bsoncxx
+    #message(SEND_ERROR "C ${MONGO_LIBRARY_DIRS}") # Error:C /usr/local/lib
+    #message(SEND_ERROR "D ${MONGO_LDFLAGS}")      # Error:D -L/usr/local/lib;-lmongocxx;-lbsoncxx
+    #message(SEND_ERROR "E ${MONGO_LDFLAGS_OTHER}")# Error:E
+    #message(SEND_ERROR "F ${MONGO_INCLUDE_DIRS}") # Error:F /home/camelia/Documents/MYCDRIVER/include/libbson-1.0;/home/camelia/Documents/MYCDRIVER/include/libmongoc-1.0;/usr/local/include/mongocxx/v_noabi;/usr/local/include/bsoncxx/v_noabi
+    #message(SEND_ERROR "G ${MONGO_CFLAGS}")       # Error:G -I/home/camelia/Documents/MYCDRIVER/include/libbson-1.0;-I/home/camelia/Documents/MYCDRIVER/include/libmongoc-1.0;-I/usr/local/include/mongocxx/v_noabi;-I/usr/local/include/bsoncxx/v_noabi
+    #message(SEND_ERROR "H ${MONGO_CFLAGS_OTHER}") # Error:H
+    #END ADDED FOR MONGODB
+
     IF("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
         SET(CMAKE_MACOSX_RPATH 1)
     ENDIF()
 
-    SET (CXX_OPTIONS       "-std=c++11 -Wno-deprecated -Wall -Werror -Wshadow -Wextra -Wfloat-equal -Wpointer-arith -Wwrite-strings -Wpacked")
+    SET (CXX_OPTIONS       "-std=c++11 -Wno-deprecated -Wall -Werror -Wshadow -Wextra -Wfloat-equal -Wpointer-arith -Wwrite-strings -Wpacked  ${MONGO_CFLAGS}")
     SET (CXX_OPTION_ANSI   "-ansi")
     SET (CXX_EFFECTIVE_CXX "-Wmissing-format-attribute -Wredundant-decls -Wno-error=effc++ -Weffc++")
     
@@ -59,21 +74,7 @@ IF(UNIX)
         ENDIF()
     ENDIF()
 
-    #added for MongoDB
-    SET(ENV{PKG_CONFIG_PATH} "/home/camelia/Documents/MYCDRIVER/lib/pkgconfig")
-    find_package(PkgConfig REQUIRED)
-    pkg_search_module(MONGO REQUIRED libmongocxx)
-
-    #message(SEND_ERROR "A ${MONGO_FOUND}")        # Error:A 1
-    #message(SEND_ERROR "B ${MONGO_LIBRARIES}")    # Error:B mongocxx;bsoncxx
-    #message(SEND_ERROR "C ${MONGO_LIBRARY_DIRS}") # Error:C /usr/local/lib
-    #message(SEND_ERROR "D ${MONGO_LDFLAGS}")      # Error:D -L/usr/local/lib;-lmongocxx;-lbsoncxx
-    #message(SEND_ERROR "E ${MONGO_LDFLAGS_OTHER}")# Error:E
-    #message(SEND_ERROR "F ${MONGO_INCLUDE_DIRS}") # Error:F /home/camelia/Documents/MYCDRIVER/include/libbson-1.0;/home/camelia/Documents/MYCDRIVER/include/libmongoc-1.0;/usr/local/include/mongocxx/v_noabi;/usr/local/include/bsoncxx/v_noabi
-    #message(SEND_ERROR "G ${MONGO_CFLAGS}")       # Error:G -I/home/camelia/Documents/MYCDRIVER/include/libbson-1.0;-I/home/camelia/Documents/MYCDRIVER/include/libmongoc-1.0;-I/usr/local/include/mongocxx/v_noabi;-I/usr/local/include/bsoncxx/v_noabi
-    #message(SEND_ERROR "H ${MONGO_CFLAGS_OTHER}") # Error:H
-    #END ADDED FOR MONGODB
-
+    
     SET (CMAKE_C_FLAGS ${CMAKE_C_FLAGS} " -fPIC ")
     SET (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} " -fPIC ${CXX_OPTIONS} -pipe ${MONGO_CFLAGS}")
 ENDIF()

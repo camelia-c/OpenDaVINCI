@@ -60,9 +60,8 @@ ENDIF()
 ###########################################################################
 # Include flags for compiling.
 INCLUDE (CompileFlags)
-#message(SEND_ERROR "--------------------------------------------------------------- ${CMAKE_CXX_FLAGS}") # here it sees -std=c++11
-#SET (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}) # this gives error in  Performing build step for 'odtools', [ 50%] Building CXX object odrecorder/CMakeFiles/odrecorderlib-static.dir/src/DBRecorderModule.cpp.o -> requires -std=c++11 or -std=gnu++11 compiler options
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11") #this gives other error, afterwards, in Scanning dependencies of target odrecorderlib-static , [ 50%] Building CXX object odrecorder/CMakeFiles/odrecorderlib-static.dir/src/RecorderModule.cpp.o  --> c++: fatal error: no input files , compilation terminated. , /bin/sh: 1: -std=c++11: not found
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11") 
 
 
 ###########################################################################

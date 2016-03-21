@@ -27,10 +27,16 @@
 #include "tools/recorder/DBRecorder.h"
 #include "tools/recorder/SharedDataListener.h"
 
+
+#include "automotivedata/generated/automotive/VehicleData.h"
+#include "automotivedata/generated/cartesian/Point2.h"
+
 #include <bsoncxx/builder/stream/document.hpp>
 #include <bsoncxx/json.hpp>
 #include <mongocxx/client.hpp>
 #include <mongocxx/instance.hpp>
+
+
 
 namespace tools {
     namespace recorder {
@@ -46,18 +52,18 @@ namespace tools {
 	    m_fifo(),
 	    m_sharedDataListener(NULL),
 	    m_outSharedMemoryFile(NULL),
-	    m_dumpSharedData(dumpSharedData) {
+	    m_dumpSharedData(dumpSharedData),
+            targetdbname(dname) {
 
 	    // Get database name
-	    const string dbname(dname); 
-	    cout << "In DBRecorder the dbname is: " << dbname << "\n";
-            //targetdbname(dname);
-            
+	    //const string dbname(dname); 
+	    cout << "In DBRecorder the dbname is: " << targetdbname << "\n";
+                        
             //connect to the database
             mongocxx::instance inst{};
             mongocxx::client conn{mongocxx::uri{}};
             bsoncxx::builder::stream::document document{};
-            auto collection = conn[dbname]["testcollection"];
+            auto collection = conn[targetdbname]["testcollection2"];
             //this is just to ensure that it can read documents fine from MongoDB
             auto cursor = collection.find({});
 
@@ -105,25 +111,73 @@ namespace tools {
 	}
 
 	void DBRecorder::recordQueueEntries() {
+	    mongocxx::instance inst{};
             mongocxx::client conn{mongocxx::uri{}};
-            auto collection = conn[targetdbname]["testcollection"];
+            auto collection = conn[targetdbname]["testcollection2"];
 	    if (!m_fifo.isEmpty()) {
 		uint32_t numberOfEntries = m_fifo.getSize();
 		for (uint32_t i = 0; i < numberOfEntries; i++) {
 		    Container c = m_fifo.leave();
+		    if(c.getDataType() != Container::VEHICLEDATA){
+		            /*
+                               //from AutomotiveData.odvd
+				message automotive.VehicleData [id = 39] {
+	    				cartesian.Point2 position [id = 1];
+	    				cartesian.Point2 velocity [id = 2];
+	    				double heading [id = 3];
+	    				double absTraveledPath [id = 4];
+	    				double relTraveledPath [id = 5];
+	    				double speed [id = 6];
+	    				double v_log [id = 7];
+	    				double v_batt [id = 8];
+	    				double temp [id = 9];
+				}
+                               //from /libautomotivedata/include/generated/automotive
+                               //from /libautomotivedata/src/generated/automotive
+		            */
+                            automotive::VehicleData vd = c.getData<automotive::VehicleData>()
+                            bsoncxx::builder::stream::document doc{};
+
+                            cartesian::Point2 position = vd.getPosition();
+                            doc << "position" << position.toString(); 
+                            /*  
+                            //to be modified for spatial data, e.g.                            
+                              location: {
+     				 type: "Point",
+     				 coordinates: [-73.856077, 40.848447]
+   				 }
+                            */
+
+                            cartesian::Point2 velocity = vd.getVelocity();
+                            float* coords = speed.getP();
+			    doc << "velocityX" << coords[0] ;
+                            doc << "velocityY" << coords[1] ;
+
+                            doc << "heading" << vd.getHeading();
+                            doc << "absTraveledPath" << vd.getAbsTraveledPath();
+			    doc << "relTraveledPath" << vd.getRelTraveledPath();
+			    doc << "v_log" << vd.getV_log();
+			    doc << "v_batt" << vd.getV_batt().;
+			    doc << "temp" << vd.getTemp();
+
+                            collection.insert_one(doc.view());
+			    
+                     }//if vehicledata
+
+
+                    //commented
+		    /*
 		    // Filter undefined data as well as recorder commands.
 		    if ( (c.getDataType() != Container::UNDEFINEDDATA) &&
 		         (c.getDataType() != Container::RECORDER_COMMAND)  &&
 		         (c.getDataType() != Container::SHARED_DATA)  &&
 		         (c.getDataType() != Container::SHARED_IMAGE) ) {
-
-			  bsoncxx::builder::stream::document document{};
-
-                          document << "hello" << "world";
-                          collection.insert_one(document.view());
-                          
-		          //TODO take fields from c
+                            //store the data
 		     }//if
+
+                     */
+
+
 		}//for
 		
 	    }//if

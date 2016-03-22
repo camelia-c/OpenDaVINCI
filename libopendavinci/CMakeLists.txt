@@ -126,9 +126,9 @@ ADD_CUSTOM_TARGET(GenerateDataStructures DEPENDS ${CMAKE_BINARY_DIR}/coredata/in
 
 ###########################################################################
 # Set linking libraries to successfully link test suite binaries.
-SET (LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+SET (LIBRARIES ${CMAKE_THREAD_LIBS_INIT}) 
 IF(LIBRT_FOUND)
-    SET(LIBRARIES ${LIBRARIES} ${LIBRT_LIBRARIES} ${MONGO_LDFLAGS}) #added MongoDB
+    SET(LIBRARIES ${LIBRARIES} ${LIBRT_LIBRARIES} ${MONGO_LDFLAGS} ${AUTOMOTIVEDATA_LIBRARIES}) #added MongoDB
 ENDIF()
 
 # Add CoreFoundation and IOKit on Mac OS X.

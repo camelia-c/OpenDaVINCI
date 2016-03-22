@@ -74,6 +74,13 @@ IF(    (LIBRT_FOUND)
     SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_LINUX_RT -std=c++11") #added for MongoDB -std=c++11
 ENDIF()
 
+
+###########################################################################
+# Find AutomotiveData, needed for DBRecorder, when inserting in MongoDB
+SET(AUTOMOTIVEDATA_DIR "${CMAKE_INSTALL_PREFIX}")
+FIND_PACKAGE (AutomotiveData REQUIRED)
+INCLUDE_DIRECTORIES (${AUTOMOTIVEDATA_INCLUDE_DIRS})
+
 ###########################################################################
 # Try to find the odDataStructureGenerator to generate our own data structures.
 #

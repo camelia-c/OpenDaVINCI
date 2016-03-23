@@ -28,6 +28,13 @@
 #include "core/base/FIFOQueue.h"
 #include "tools/recorder/SharedDataListener.h"
 
+//THESE INTRODUCE CIRCULAR DEPENDENCY  libautomotivedata <-> libopendavinci
+//#include "automotivedata/generated/automotive/VehicleData.h"
+//#include "automotivedata/generated/cartesian/Point2.h"
+
+#include "automotivedata/VehicleData.h"
+#include "automotivedata/Point2.h"
+
 #include <bsoncxx/builder/stream/document.hpp>
 #include <bsoncxx/json.hpp>
 #include <mongocxx/client.hpp>

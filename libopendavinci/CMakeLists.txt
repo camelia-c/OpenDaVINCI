@@ -77,9 +77,9 @@ ENDIF()
 
 ###########################################################################
 # Find AutomotiveData, needed for DBRecorder, when inserting in MongoDB
-SET(AUTOMOTIVEDATA_DIR "${CMAKE_INSTALL_PREFIX}")
-FIND_PACKAGE (AutomotiveData REQUIRED)
-INCLUDE_DIRECTORIES (${AUTOMOTIVEDATA_INCLUDE_DIRS})
+#for MongoDB, but creates circular dependency
+#SET(AUTOMOTIVEDATA_DIR "${CMAKE_INSTALL_PREFIX}")
+#FIND_PACKAGE (AutomotiveData REQUIRED)
 
 ###########################################################################
 # Try to find the odDataStructureGenerator to generate our own data structures.
@@ -126,9 +126,9 @@ ADD_CUSTOM_TARGET(GenerateDataStructures DEPENDS ${CMAKE_BINARY_DIR}/coredata/in
 
 ###########################################################################
 # Set linking libraries to successfully link test suite binaries.
-SET (LIBRARIES ${CMAKE_THREAD_LIBS_INIT}) 
+SET (LIBRARIES ${CMAKE_THREAD_LIBS_INIT} ) # ${AUTOMOTIVEDATA_LIBRARIES}) #for MongoDB, but creates circular dependency
 IF(LIBRT_FOUND)
-    SET(LIBRARIES ${LIBRARIES} ${LIBRT_LIBRARIES} ${MONGO_LDFLAGS} ${AUTOMOTIVEDATA_LIBRARIES}) #added MongoDB
+    SET(LIBRARIES ${LIBRARIES} ${LIBRT_LIBRARIES} ${MONGO_LDFLAGS}) # ${AUTOMOTIVEDATA_LIBRARIES}) #for MongoDB, but creates circular dependency
 ENDIF()
 
 # Add CoreFoundation and IOKit on Mac OS X.
@@ -287,6 +287,8 @@ ENDIF()
 INCLUDE_DIRECTORIES(${COREDATA_DIR}/include)
 # Set include directory.
 INCLUDE_DIRECTORIES(include)
+
+#INCLUDE_DIRECTORIES (${AUTOMOTIVEDATA_INCLUDE_DIRS}/automotivedata) #for MongoDB, but creates circular dependency
 
 ###############################################################################
 # Set sources for coredata files generated from CoreData.odvd.
@@ -476,7 +478,7 @@ IF(    (UNIX)
     ENDIF()
     SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${ARCH}")
     SET(CPACK_DEB_COMPONENT_INSTALL ON)
-    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "build-essential,rpm,cmake,git")
+    SET(CPACK_DEBIAN_PACKAGE_DEPENDS "build-essential,rpm,cmake,git") #,libautomotivedata") #for MongoDB, but creates circular dependency
 
     # RPM packages:
     IF("${ARMHF}" STREQUAL "YES")
@@ -494,6 +496,7 @@ IF(    (UNIX)
     SET(CPACK_RPM_COMPONENT_INSTALL ON)
     SET(CPACK_RPM_PACKAGE_LICENSE "LGPL")
     SET(CPACK_RPM_PACKAGE_DEPENDS "cmake, gcc, gcc-c++, git")
+    #SET(CPACK_RPM_PACKAGE_REQUIRES "libautomotivedata") #for MongoDB, but creates circular dependency
 
     # Resulting package name:
     SET(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${ARCH})

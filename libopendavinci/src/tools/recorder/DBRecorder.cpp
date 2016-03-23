@@ -28,8 +28,12 @@
 #include "tools/recorder/SharedDataListener.h"
 
 
-#include "automotivedata/generated/automotive/VehicleData.h"
-#include "automotivedata/generated/cartesian/Point2.h"
+//THESE INTRODUCE CIRCULAR DEPENDENCY  libautomotivedata <-> libopendavinci
+//#include "automotivedata/generated/automotive/VehicleData.h"
+//#include "automotivedata/generated/cartesian/Point2.h"
+
+#include "automotivedata/VehicleData.h"
+#include "automotivedata/Point2.h"
 
 #include <bsoncxx/builder/stream/document.hpp>
 #include <bsoncxx/json.hpp>
@@ -135,8 +139,9 @@ namespace tools {
                                //from /libautomotivedata/include/generated/automotive
                                //from /libautomotivedata/src/generated/automotive
 		            */
-                            automotive::VehicleData vd = c.getData<automotive::VehicleData>()
+                            automotive::VehicleData vd = c.getData<automotive::VehicleData>();
                             bsoncxx::builder::stream::document doc{};
+			    cout << "getting a VEHICLEDATA container" << "\n";
 
                             cartesian::Point2 position = vd.getPosition();
                             doc << "position" << position.toString(); 
@@ -149,7 +154,7 @@ namespace tools {
                             */
 
                             cartesian::Point2 velocity = vd.getVelocity();
-                            float* coords = speed.getP();
+                            float* coords = velocity.getP();
 			    doc << "velocityX" << coords[0] ;
                             doc << "velocityY" << coords[1] ;
 
@@ -157,8 +162,10 @@ namespace tools {
                             doc << "absTraveledPath" << vd.getAbsTraveledPath();
 			    doc << "relTraveledPath" << vd.getRelTraveledPath();
 			    doc << "v_log" << vd.getV_log();
-			    doc << "v_batt" << vd.getV_batt().;
+			    doc << "v_batt" << vd.getV_batt();
 			    doc << "temp" << vd.getTemp();
+
+			    cout << "Inserting record: pos " << position.toString() << " abstraveledpath " << vd.getAbsTraveledPath() << "\n";
 
                             collection.insert_one(doc.view());
 			    

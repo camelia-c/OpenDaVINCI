@@ -191,7 +191,7 @@ include_directories(${MONGO_LIBRARY_DIRS})
 
 IF(${BUILD_OPENDAVINCI})
     ExternalProject_Add (libopendavinci
-        DEPENDS odDataStructureGenerator
+        DEPENDS odDataStructureGenerator #libautomotivedata #added mongodb, but creates circular dependency
         DOWNLOAD_COMMAND ""
         UPDATE_COMMAND ""
         SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libopendavinci"

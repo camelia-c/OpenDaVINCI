@@ -85,6 +85,9 @@ IF(     NOT("${CMAKE_C_COMPILER}" STREQUAL "")
     MESSAGE(STATUS "Found C++ compiler:         Building opendavinci-tutorials")
     SET(BUILD_TUTORIALS 1)
 
+    MESSAGE(STATUS "Found C++ compiler:         Building MongoDBRecorder")
+    SET(BUILD_MONGODBRECORDER 1)
+
     IF (OPENCV_FOUND)
         IF (    OPENGL_FOUND
             AND GLUT_FOUND
@@ -360,5 +363,18 @@ IF(${BUILD_AUTOMOTIVE_MINIATURE})
         TEST_BEFORE_INSTALL 1
         TEST_COMMAND ${CMAKE_CTEST_COMMAND} ${CTEST_PARAMETERS}
         INSTALL_COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/automotive-miniature-prefix/src/automotive-miniature-build --target install COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/automotive-miniature-prefix/src/automotive-miniature-build --target ${MAKE_PACKAGE})
+ENDIF()
+
+# Next, build MongoDBRecorder.
+IF(${BUILD_MONGODBRECORDER})
+    ExternalProject_Add (MongoDBrecorder
+        DEPENDS libopendavinci libautomotivedata
+        DOWNLOAD_COMMAND ""
+        UPDATE_COMMAND ""
+        SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/MongoDBrecorder"
+        CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}"
+        CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE}"
+        TEST_COMMAND ""
+        INSTALL_COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/MongoDBrecorder-prefix/src/MongoDBrecorder-build --target install)
 ENDIF()
 

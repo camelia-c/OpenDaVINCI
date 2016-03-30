@@ -29,6 +29,7 @@
 
 #include "automotivedata/generated/automotive/VehicleData.h"
 #include "automotivedata/generated/cartesian/Point2.h"
+#include "automotivedata/generated/automotive/VehicleControl.h"
 
 
 using namespace std;
@@ -49,19 +50,7 @@ DBRecorder::~DBRecorder() {}
 void DBRecorder::setUp() {
     cout << "This method is called before the component's body is executed." << endl;
     //we should be able to read the database name from the configuration file, as we did in DBRecorderModule
-    //const string recorderOutputDB = getKeyValueConfiguration().getValue<string>("odrecorder.outputDB");
-
-    std::string targetdbname = "testdb"; 
-    mongocxx::instance inst{};
-    mongocxx::client conn{mongocxx::uri{}};
-    bsoncxx::builder::stream::document document{};
-    auto collection = conn[targetdbname]["testcollection2"];
-    //this is just to ensure that it can read documents fine from MongoDB
-    auto cursor = collection.find({});
-
-    for (auto&& doc : cursor) {
-	std::cout << bsoncxx::to_json(doc) << std::endl;
-    } 
+    //const string recorderOutputDB = getKeyValueConfiguration().getValue<string>("odrecorder.outputDB"); 
 }
 
 void DBRecorder::tearDown() {
@@ -69,10 +58,11 @@ void DBRecorder::tearDown() {
 }
 
 void DBRecorder::nextContainer(Container &c) {
-    std::string targetdbname = "testdb"; 
-    mongocxx::instance inst{};
-    mongocxx::client conn{mongocxx::uri{}};
-    auto collection = conn[targetdbname]["testcollection2"];
+
+    auto collection3 = conn[targetdbname]["testcollection3"];
+    auto collection4 = conn[targetdbname]["testcollection4"];
+    
+
     cout << "Received container of type " << c.getDataType() <<
                               " sent at " << c.getSentTimeStamp().getYYYYMMDD_HHMMSSms() <<
                           " received at " << c.getReceivedTimeStamp().getYYYYMMDD_HHMMSSms() << endl;
@@ -81,7 +71,10 @@ void DBRecorder::nextContainer(Container &c) {
         TimeStamp ts = c.getData<TimeStamp>();
         cout << "Received the following time stamp: " << ts.toString() << endl;
     }
-    if(c.getDataType() == Container::VEHICLEDATA){
+    
+    // if(c.getDataType() == Container::VEHICLEDATA){   //OLD WAY...
+
+    if(c.getDataType() == automotive::VehicleData::ID()){ 
             /*
                //from AutomotiveData.odvd
 		message automotive.VehicleData [id = 39] {
@@ -126,9 +119,32 @@ void DBRecorder::nextContainer(Container &c) {
 
 	    cout << "Inserting record: pos " << position.toString() << " abstraveledpath " << vd.getAbsTraveledPath() << "\n";
 
-            collection.insert_one(doc.view());
+            collection3.insert_one(doc.view());
 	    
      }//if vehicledata
+     else if(c.getDataType() == automotive::VehicleControl::ID()){ 
+	/* from AutomotiveData.odvd
+	    message automotive.VehicleControl [id = 41] {
+		    double speed [id = 1, fourbyteid = 0x0E43596B];
+		    double acceleration [id = 2, fourbyteid = 0x0E435991];
+		    double steeringWheelAngle [id = 3, fourbyteid = 0x0E435969];
+		    bool brakeLights [id = 4, fourbyteid = 0x0E43599B];
+		    bool flashingLightsLeft [id = 5, fourbyteid = 0x09823BD7];
+		    bool flashingLightsRight [id = 6, fourbyteid = 0x0E435996];
+        	  }
+	    
+        */
+	automotive::VehicleControl vc = c.getData<automotive::VehicleControl>();
+        bsoncxx::builder::stream::document doc{};
+	cout << "getting a VEHICLECONTROL container" << "\n";
+	
+	doc << "speed" << vc.getSpeed();
+	doc << "acceleration" << vc.getAcceleration();	
+	doc << "steeringWheelAngle" << vc.getSteeringWheelAngle();	
+
+	collection4.insert_one(doc.view());
+
+     }//if vehiclecontrol
 
 }
 

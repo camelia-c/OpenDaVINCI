@@ -19,6 +19,11 @@
 
 #include <opendavinci/odcore/base/module/DataTriggeredConferenceClientModule.h>
 
+#include <bsoncxx/builder/stream/document.hpp>
+#include <bsoncxx/json.hpp>
+#include <mongocxx/client.hpp>
+#include <mongocxx/instance.hpp>
+
 class DBRecorder : public odcore::base::module::DataTriggeredConferenceClientModule {
     private:
         /**
@@ -57,6 +62,14 @@ class DBRecorder : public odcore::base::module::DataTriggeredConferenceClientMod
         virtual void setUp();
 
         virtual void tearDown();
+
+    private:
+        std::string targetdbname = "testdb";
+        mongocxx::instance inst{};
+        mongocxx::client conn{mongocxx::uri{}};
+        bsoncxx::builder::stream::document document{};
+        
+
 };
 
 

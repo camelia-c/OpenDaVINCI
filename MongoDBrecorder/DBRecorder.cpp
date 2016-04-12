@@ -73,22 +73,17 @@ void DBRecorder::tearDown() {
 
 void DBRecorder::nextContainer(Container &c) {
 
-    auto collection3 = conn[targetdbname]["testcollection3"];
-    auto collection4 = conn[targetdbname]["testcollection4"];
+    //auto collection3 = conn[targetdbname]["testcollection3"];
+    //auto collection4 = conn[targetdbname]["testcollection4"];
     auto db = conn[targetdbname];
     
 
-    cout << "Received container of type " << c.getDataType() <<
-                              " sent at " << c.getSentTimeStamp().getYYYYMMDD_HHMMSSms() <<
-                          " received at " << c.getReceivedTimeStamp().getYYYYMMDD_HHMMSSms() << endl;
-
-    if (c.getDataType() == TimeStamp::ID()) {
-        TimeStamp ts = c.getData<TimeStamp>();
-        cout << "Received the following time stamp: " << ts.toString() << endl;
-    }
+    //cout << "Received container of type " << c.getDataType() <<
+    //                          " sent at " << c.getSentTimeStamp().getYYYYMMDD_HHMMSSms() <<
+    //                      " received at " << c.getReceivedTimeStamp().getYYYYMMDD_HHMMSSms() << endl;
     
     // if(c.getDataType() == Container::VEHICLEDATA){   //OLD WAY...
-
+    
     if(c.getDataType() == automotive::VehicleData::ID()){ 
             /*
                //from AutomotiveData.odvd
@@ -106,26 +101,15 @@ void DBRecorder::nextContainer(Container &c) {
                //from /libautomotivedata/include/generated/automotive
                //from /libautomotivedata/src/generated/automotive
             */
-            automotive::VehicleData vd = c.getData<automotive::VehicleData>();
-            //bsoncxx::builder::stream::document doc{};
-	    cout << "getting a VEHICLEDATA container" << "\n";
+            cout << "getting a VEHICLEDATA container" << "\n";
 
-            cartesian::Point2 position = vd.getPosition();
-            
-            
+            automotive::VehicleData vd = c.getData<automotive::VehicleData>();	    
+
+            cartesian::Point2 position = vd.getPosition();  
             float* poscoords = position.getP();
 
             cartesian::Point2 velocity = vd.getVelocity();
             float* velcoords = velocity.getP();
-
-            //doc << "position" << position.toString(); 
-            /*  
-            //to be modified for spatial data, e.g.                            
-              location: {
-		 type: "Point",
-		 coordinates: [-73.856077, 40.848447]
-		 }
-            */
 
             bsoncxx::document::value mydoc = bsoncxx::builder::stream::document{} << "position" << open_document << "type" << "Point" << "coordinates" 
                                                    <<  open_array << poscoords[0] << poscoords[1] << close_array << close_document 
@@ -139,9 +123,7 @@ void DBRecorder::nextContainer(Container &c) {
                                                    << "timeSent" << c.getSentTimeStamp().getYYYYMMDD_HHMMSSms()
                                                    << finalize;
 
-	    //cout << "Inserting record: pos " << position.toString() << " abstraveledpath " << vd.getAbsTraveledPath() << "\n";
-
-            auto res = db["testcollection3"].insert_one(mydoc.view()); //.view() //
+            auto res = db["testcollection5"].insert_one(mydoc.view());
 	    
      }//if vehicledata
      else if(c.getDataType() == automotive::VehicleControl::ID()){ 
@@ -156,33 +138,56 @@ void DBRecorder::nextContainer(Container &c) {
         	  }
 	    
         */
-	automotive::VehicleControl vc = c.getData<automotive::VehicleControl>();
-        bsoncxx::builder::stream::document doc{};
 	cout << "getting a VEHICLECONTROL container" << "\n";
+	automotive::VehicleControl vc = c.getData<automotive::VehicleControl>();	
 	
-	doc << "speed" << vc.getSpeed();
-	doc << "acceleration" << vc.getAcceleration();	
-	doc << "steeringWheelAngle" << vc.getSteeringWheelAngle();	
-	doc << "timeSent" << c.getSentTimeStamp().getYYYYMMDD_HHMMSSms();
+	bsoncxx::document::value mydoc = bsoncxx::builder::stream::document{} << "speed" << vc.getSpeed() << "acceleration" << vc.getAcceleration()
+                                                   << "steeringWheelAngle" << vc.getSteeringWheelAngle()
+                                                   << "timeSent" << c.getSentTimeStamp().getYYYYMMDD_HHMMSSms() 
+                                                   << finalize;
 
-	collection4.insert_one(doc.view());
+        auto res = db["testcollection6"].insert_one(mydoc.view()); 
 
      }//if vehiclecontrol
      else if(c.getDataType() == automotive::miniature::SensorBoardData::ID()){
+        /* from AutomotiveData.odvd
+	   message automotive.miniature.SensorBoardData [id = 81] {
+		    uint32 numberOfSensors [id = 1];
+		    map<uint32, double> distances [id = 2];
+		}
+        */
+	//bsoncxx::builder::stream::document doc{};
+
+        cout << "getting a SENSORBOARD" << "\n"; 
         automotive::miniature::SensorBoardData sbd = c.getData<automotive::miniature::SensorBoardData> ();
-        int mapsize = sbd.getSize_MapOfDistances();
-        cout << "it's a sensor board and has map size:" << mapsize << "\n"; 
+        if(!sbd.isEmpty_MapOfDistances()){
+		int mapsize = sbd.getSize_MapOfDistances();
+		std::map<uint32_t, double> mapdistances = sbd.getMapOfDistances();
+		std::map<uint32_t, double>::const_iterator it = mapdistances.begin();
+                std::stringstream sstrOfDistances;
+		//bsoncxx::document::value mydoc = bsoncxx::builder::stream::document{};
+
+		while (it != mapdistances.end()) {
+		    sstrOfDistances << it->first << "=" << it->second << endl;
+		    //mydoc << "sensor" << open_document << "side" << it->first << "value" << it->second << close_document;
+		    it++;
+
+		}
+
+		//mydoc << finalize;
+		//auto res = db["testcollection7"].insert_one(mydoc.view()); 
+
+	}        
   
      }
-     else if(c.getDataType() == odcore::data::image::SharedImage::ID()){
+     else if(c.getDataType() == odcore::data::image::SharedImage::ID()){  //14
+	cout << "getting an IMAGE" << "\n"; 
         //it's an image
         odcore::data::image::SharedImage si = c.getData<odcore::data::image::SharedImage> ();
         /*
         // Check if we have already attached to the shared memory.
         if (!m_hasAttachedToSharedImageMemory) {
-	        m_sharedImageMemory
-			        = odcore::wrapper::SharedMemoryFactory::attachToSharedMemory(
-					        si.getName());
+	        m_sharedImageMemory= odcore::wrapper::SharedMemoryFactory::attachToSharedMemory(si.getName());
         }
 
         // Check if we could successfully attach to the shared memory.
@@ -200,8 +205,9 @@ void DBRecorder::nextContainer(Container &c) {
 		        memcpy(m_image->imageData, m_sharedImageMemory->getSharedMemory(), si.getWidth() * si.getHeight() * numberOfChannels);
 	        }
 	*/
-        cout<<"it's an image \n";
+        
      }//if image
+     
 
 }
 

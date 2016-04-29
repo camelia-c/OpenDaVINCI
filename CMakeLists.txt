@@ -88,6 +88,12 @@ IF(     NOT("${CMAKE_C_COMPILER}" STREQUAL "")
     MESSAGE(STATUS "Found C++ compiler:         Building MongoDBRecorder")
     SET(BUILD_MONGODBRECORDER 1)
 
+    MESSAGE(STATUS "Found C++ compiler:         Building MongoDBRecorderValidator")
+    SET(BUILD_MONGODBRECORDERVALIDATOR 1)
+
+    MESSAGE(STATUS "Found C++ compiler:         Building MongoDBUseCase")
+    SET(BUILD_MONGODBUSECASE 1)
+
     IF (OPENCV_FOUND)
         IF (    OPENGL_FOUND
             AND GLUT_FOUND
@@ -378,3 +384,29 @@ IF(${BUILD_MONGODBRECORDER})
         INSTALL_COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/MongoDBrecorder-prefix/src/MongoDBrecorder-build --target install)
 ENDIF()
 
+# Next, build MongoDBRecorderValidator.
+IF(${BUILD_MONGODBRECORDERVALIDATOR})
+    ExternalProject_Add (MongoDBrecorderValidator
+        DEPENDS libopendavinci libautomotivedata
+        DOWNLOAD_COMMAND ""
+        UPDATE_COMMAND ""
+        SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/MongoDBrecorderValidator"
+        CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}"
+        CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE}"
+        TEST_COMMAND ""
+        INSTALL_COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/MongoDBrecorderValidator-prefix/src/MongoDBrecorderValidator-build --target install)
+ENDIF()
+
+
+# Next, build MongoDBUseCase
+IF(${BUILD_MONGODBUSECASE})
+    ExternalProject_Add (MongoDBUseCase
+        DEPENDS libopendavinci libautomotivedata
+        DOWNLOAD_COMMAND ""
+        UPDATE_COMMAND ""
+        SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/MongoDBUseCase"
+        CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}"
+        CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN_FILE}"
+        TEST_COMMAND ""
+        INSTALL_COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/MongoDBUseCase-prefix/src/MongoDBUseCase-build --target install)
+ENDIF()

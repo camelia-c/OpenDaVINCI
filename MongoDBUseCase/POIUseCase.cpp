@@ -148,7 +148,7 @@ void POIUseCase::queryWithinNmetersPOI(double x, double y, double distance, doub
    std::string timeSentClosest1D = "2016-04-14 00:00:00.0", timeSentFar1D = "2016-04-14 00:00:00.0"; //dummy value
    std::string dateSentClosestA, dateSentClosestB, dateSentClosestC, dateSentClosestD; 
 
-   int minuteFarA = -1, minuteFarB = -1, minuteFarC = -1, minuteFarD = -1;  //these keep the minute of day (from the timestamp) of the last analyzed container on each direction
+   int secondOfDayFarA = -1, secondOfDayFarB = -1, secondOfDayFarC = -1, secondOfDayFarD = -1;  //these keep the minute of day (from the timestamp) of the last analyzed container on each direction
    double xFarA = -1, yFarA = -1, xFarB = -1, yFarB = -1, xFarC = -1, yFarC = -1, xFarD = -1, yFarD = -1; //coordinates of fartherest pos prior to POI in distance meters
  
    
@@ -168,11 +168,11 @@ void POIUseCase::queryWithinNmetersPOI(double x, double y, double distance, doub
 
           timeSentClosest1A = bsoncxx::to_json(elem.get_value());
           timeSentFar1A = bsoncxx::to_json(elem.get_value());
-          std::cout << timeSentFar1A << "substr(12,2) = " << timeSentFar1A.substr(12,2) << "substr(15,2) = " << timeSentFar1A.substr(15,2) << std::endl;
-          std::cout << timeSentFar1A << "stoi(substr(15,2)) = " << stoi(timeSentFar1A.substr(12,2)) << "stoi(substr(15,2)) = " << stoi(timeSentFar1A.substr(15,2)) << std::endl;
+          //std::cout << timeSentFar1A << "substr(12,2) = " << timeSentFar1A.substr(12,2) << "substr(15,2) = " << timeSentFar1A.substr(15,2) << std::endl;
+          //std::cout << timeSentFar1A << "stoi(substr(15,2)) = " << stoi(timeSentFar1A.substr(12,2)) << "stoi(substr(15,2)) = " << stoi(timeSentFar1A.substr(15,2)) << std::endl;
           dateSentClosestA = timeSentClosest1A.substr(0,11);
           
-          minuteFarA = stoi(timeSentFar1A.substr(12,2)) *60 + stoi(timeSentFar1A.substr(15,2)); 
+          secondOfDayFarA = stoi(timeSentFar1A.substr(12,2)) * 3600 + stoi(timeSentFar1A.substr(15,2)) * 60 + stoi(timeSentFar1A.substr(18,2)); 
           xFarA = stof(bsoncxx::to_json(elemcoordsX.get_value()));
           yFarA = stof(bsoncxx::to_json(elemcoordsY.get_value()));
           //fromDirA.push_back(timeSentClosest1A.substr(1,timeSentClosest1A.length()-2)); // skip quotes
@@ -182,26 +182,29 @@ void POIUseCase::queryWithinNmetersPOI(double x, double y, double distance, doub
       else{
           
           std::string timeSent1 = bsoncxx::to_json(elem.get_value());
-	  int minute1 = stoi(timeSent1.substr(12,2)) *60 + stoi(timeSent1.substr(15,2)); 
+	  int second1 = stoi(timeSent1.substr(12,2)) * 3600 + stoi(timeSent1.substr(15,2)) * 60  + stoi(timeSent1.substr(18,2)) ; 
           std::string date1 = timeSent1.substr(0,11);
           //check if timeSent1 belongs to the same direction as one of the other vector last elements, i.e at most 2 min away
-          //std::cout << "minute1= "<< minute1 << " minuteFarA= " << minuteFarA << " minuteFarB= " << minuteFarB << " minuteFarC= " << minuteFarC << " minuteFarD= " << minuteFarD << std::endl;
+          std::cout << "second1= "<< second1 << " secondOfDayFarA= " << secondOfDayFarA << " secondOfDayFarB= " << secondOfDayFarB << " secondOfDayFarC= " << secondOfDayFarC << " secondOfDayFarD= " << secondOfDayFarD << std::endl;
           bool assignedToDir = false;
-          if((date1.compare(dateSentClosestA) == 0) && ((minuteFarA - minute1) >= 0)&&((minuteFarA - minute1) <= 2)){
-              timeSentFar1A = bsoncxx::to_json(elem.get_value());
-              minuteFarA = minute1;
-              xFarA = stof(bsoncxx::to_json(elemcoordsX.get_value()));
-              yFarA = stof(bsoncxx::to_json(elemcoordsY.get_value()));
+          if(((date1.compare(dateSentClosestA) == 0) && (abs(secondOfDayFarA - second1) <= 120))){
+             if((secondOfDayFarA - second1) >=0) {
+                 timeSentFar1A = bsoncxx::to_json(elem.get_value());
+                 secondOfDayFarA = second1;
+                 xFarA = stof(bsoncxx::to_json(elemcoordsX.get_value()));
+                 yFarA = stof(bsoncxx::to_json(elemcoordsY.get_value()));
 
               //fromDirA.push_back(doc);
+              }
+              //else discard it
               assignedToDir = true;
               std::cout << "updated  timeSentFar1A=" <<  timeSentFar1A << " xFarA=" << xFarA << " yFarA=" << yFarA << std::endl;
           }
-          else if((date1.compare(dateSentClosestB) == 0) && (minuteFarB!=-1) && (abs(minuteFarB - minute1) <= 2)){
-              if((minuteFarB - minute1) >=0) {
+          else if((date1.compare(dateSentClosestB) == 0) && (secondOfDayFarB!=-1) && (abs(secondOfDayFarB - second1) <= 120)){
+              if((secondOfDayFarB - second1) >=0) {
                  //fromDirB.push_back(doc);
                  timeSentFar1B = bsoncxx::to_json(elem.get_value());
-                 minuteFarB = minute1;
+                 secondOfDayFarB = second1;
                  xFarB = stof(bsoncxx::to_json(elemcoordsX.get_value()));
                  yFarB = stof(bsoncxx::to_json(elemcoordsY.get_value()));
               }
@@ -209,11 +212,11 @@ void POIUseCase::queryWithinNmetersPOI(double x, double y, double distance, doub
               assignedToDir = true;
               std::cout << "updated  timeSentFar1B=" <<  timeSentFar1B << " xFarB=" << xFarB << " yFarB=" << yFarB << std::endl;
           }
-          else if((date1.compare(dateSentClosestC) == 0) && (minuteFarC!=-1) && (abs(minuteFarC - minute1) <= 2)){
-               if((minuteFarC - minute1) >=0) {
+          else if((date1.compare(dateSentClosestC) == 0) && (secondOfDayFarC!=-1) && (abs(secondOfDayFarC - second1) <= 120)){
+               if((secondOfDayFarC - second1) >=0) {
                  //fromDirC.push_back(doc);
                  timeSentFar1C = bsoncxx::to_json(elem.get_value());
-                 minuteFarC = minute1;
+                 secondOfDayFarC = second1;
                  xFarC = stof(bsoncxx::to_json(elemcoordsX.get_value()));
                  yFarC = stof(bsoncxx::to_json(elemcoordsY.get_value()));
                }
@@ -221,11 +224,11 @@ void POIUseCase::queryWithinNmetersPOI(double x, double y, double distance, doub
                assignedToDir = true;
                std::cout << "updated  timeSentFar1C=" <<  timeSentFar1C << " xFarC=" << xFarC << " yFarC=" << yFarC << std::endl;
           }
-          else if((date1.compare(dateSentClosestD) == 0) && (minuteFarD!=-1) && (abs(minuteFarD - minute1) <= 2)){
-               if((minuteFarD - minute1) >=0) {
+          else if((date1.compare(dateSentClosestD) == 0) && (secondOfDayFarD!=-1) && (abs(secondOfDayFarD - second1) <= 120)){
+               if((secondOfDayFarD - second1) >=0) {
                  //fromDirD.push_back(doc);
                  timeSentFar1D = bsoncxx::to_json(elem.get_value());
-                 minuteFarD = minute1;
+                 secondOfDayFarD = second1;
                  xFarD = stof(bsoncxx::to_json(elemcoordsX.get_value()));
                  yFarD = stof(bsoncxx::to_json(elemcoordsY.get_value()));
               }
@@ -237,35 +240,35 @@ void POIUseCase::queryWithinNmetersPOI(double x, double y, double distance, doub
           //this case happens when the container under analysis belongs to a different direction than the existing ones
           if(!assignedToDir){
             cout << "STILL NOT ASSIGNED TO DIRECTION" << std::endl;
-            if(minuteFarB ==-1){
+            if(secondOfDayFarB ==-1){
                 //fromDirB.push_back(c);
                 timeSentClosest1B = bsoncxx::to_json(elem.get_value());
                 timeSentFar1B = bsoncxx::to_json(elem.get_value());
                 dateSentClosestB = timeSentClosest1B.substr(0,11);
-                minuteFarB = minute1;
+                secondOfDayFarB = second1;
                 xFarB = stof(bsoncxx::to_json(elemcoordsX.get_value()));
                 yFarB = stof(bsoncxx::to_json(elemcoordsY.get_value()));
                 assignedToDir = true;
                 std::cout << "STARTED NEW ENTRY (B)  timeSentClosest1B =" << timeSentClosest1B << "  timeSentFar1B=" <<  timeSentFar1B << " xFarB=" << xFarB << " yFarB=" << yFarB << std::endl;
             }
-            else if(minuteFarC ==-1){
+            else if(secondOfDayFarC ==-1){
                 //fromDirC.push_back(c);
                 timeSentClosest1C = bsoncxx::to_json(elem.get_value());
                 timeSentFar1C = bsoncxx::to_json(elem.get_value());
                 dateSentClosestC = timeSentClosest1C.substr(0,11); 
-                minuteFarC = minute1;
+                secondOfDayFarC = second1;
                 xFarC = stof(bsoncxx::to_json(elemcoordsX.get_value()));
                 yFarC = stof(bsoncxx::to_json(elemcoordsY.get_value()));
                 assignedToDir = true;
                 std::cout << "STARTED NEW ENTRY (C)   timeSentClosest1C =" << timeSentClosest1C << " timeSentFar1C=" <<  timeSentFar1C << " xFarC=" << xFarC << " yFarC=" << yFarC << std::endl;
                 
             }
-            else if(minuteFarD ==-1){
+            else if(secondOfDayFarD ==-1){
                 //fromDirD.push_back(c);
                 timeSentClosest1D = bsoncxx::to_json(elem.get_value());
                 timeSentFar1D = bsoncxx::to_json(elem.get_value());
                 dateSentClosestD = timeSentClosest1D.substr(0,11); 
-                minuteFarD = minute1;
+                secondOfDayFarD = second1;
                 xFarD = stof(bsoncxx::to_json(elemcoordsX.get_value()));
                 yFarD = stof(bsoncxx::to_json(elemcoordsY.get_value()));
                 assignedToDir = true;
@@ -276,12 +279,12 @@ void POIUseCase::queryWithinNmetersPOI(double x, double y, double distance, doub
 
           if(!assignedToDir){
               std::cout << "if assignedToDir is still false, than an error happened";
-              std::cout << "currently analyzed has timestamp " << timeSent1 << "of which minute is " << minute1 << std::endl;
+              std::cout << "currently analyzed has timestamp " << timeSent1 << "of which second of day is second1=" << second1 << std::endl;
               std::cout << "---------------- for all directions registered so far the situation is:" << std::endl;
-              std::cout << "DIRECTION A: timeSentClosest1A = " << timeSentClosest1A << " minuteA = " << minuteFarA << std::endl;
-              std::cout << "DIRECTION B: timeSentClosest1A = " << timeSentClosest1B << " minuteB = " << minuteFarB << std::endl;
-              std::cout << "DIRECTION C: timeSentClosest1A = " << timeSentClosest1C << " minuteC = " << minuteFarC << std::endl;
-              std::cout << "DIRECTION D: timeSentClosest1A = " << timeSentClosest1D << " minuteD = " << minuteFarD << std::endl;
+              std::cout << "DIRECTION A: timeSentClosest1A = " << timeSentClosest1A << " secondOfDayFarA = " << secondOfDayFarA << std::endl;
+              std::cout << "DIRECTION B: timeSentClosest1A = " << timeSentClosest1B << " secondOfDayFarB = " << secondOfDayFarB << std::endl;
+              std::cout << "DIRECTION C: timeSentClosest1A = " << timeSentClosest1C << " secondOfDayFarC = " << secondOfDayFarC << std::endl;
+              std::cout << "DIRECTION D: timeSentClosest1A = " << timeSentClosest1D << " secondOfDayFarD = " << secondOfDayFarD << std::endl;
               std::cout << "-----------------------------------------------------------------------" << std::endl;
           }
 
@@ -294,7 +297,7 @@ void POIUseCase::queryWithinNmetersPOI(double x, double y, double distance, doub
    std::string timeSentClosest = timeSentClosest1A.substr(1,timeSentClosest1A.length()-2);
    std::string timeSentFar =  timeSentFar1A.substr(1,timeSentFar1A.length()-2); 
    double distCarA = sqrt((xFarA - xcar)*(xFarA - xcar)+(yFarA - ycar)*(yFarA - ycar));
-   std::cout << "On direction A, the distance from car is " << distCarA; 
+   std::cout << "On direction A, the distance from car is " << distCarA << std::endl; 
    double distCarMin = distCarA;
 
    if((xFarB != -1) && (yFarB != -1)) {

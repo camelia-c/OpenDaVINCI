@@ -91,13 +91,61 @@ void DBRecorderValidator::tearDown() {
 
 void DBRecorderValidator::nextContainer(Container &c) {  
    
-   //wip
+    cout << "current container =" << currentCount << "but startContainer=" << startContainer << "and currentSampleSize =" << currentSampleCount << " while sampleSize=" << sampleSize << endl;
+    currentCount++;
+    if((currentCount >= startContainer)&&(currentSampleCount < sampleSize)){            
+
+            cout << "------------  possible candidate, if containertype matches our interest" << endl;
+	    //test if it is the type of container, do a Bernoulli trial whether to include it or not in the sample
+	    if(c.getDataType() == testedContainerType){
+                cout << " --------------it's the containerType of our interest, do a Bernoulli trial" << endl;
+		if (d(gen)){
+			samplecontainers.push_back(c);
+                        currentSampleCount++; 
+                        cout << " CONTAINER RETAINED !" << endl;
+		}
+	    }
+    }
 
 }
 
 void DBRecorderValidator::validateDataSample() {   
 
-    //wip
+    auto db = conn[targetdbname];
+    int i = 1;
+    int countBadContainers = 0;
+    if(currentSampleCount >= 1){
+	    for(odcore::data::Container c : samplecontainers){
+                //there should be only one type of containers, of type testedContainerType
+
+		cout << i << ") in sample is container of type " << c.getDataType() << " sent at " << c.getSentTimeStamp().getYYYYMMDD_HHMMSSms() << std::endl;
+		i++;
+
+		// query MongoDB for this container (by type and time)- it should find exactly one, exactly with this data, otherwise mark as different in output  
+		bsoncxx::builder::stream::document filter_builder;
+		filter_builder << "timeSent" << c.getSentTimeStamp().getYYYYMMDD_HHMMSSms() << "containerType" << c.getDataType() ; //<< finalize;      
+		auto cursor = db["testcollection7"].find(filter_builder.view());
+
+		int counter_answers = 0;
+		for (auto&& doc : cursor) {
+			counter_answers ++;
+			std::cout << bsoncxx::to_json(doc) << std::endl;
+			//check for equality in all fields, possible extension
+
+
+		}       
+
+		if(counter_answers != 1){
+			std::cout << "FOR THIS CONTAINER, SOMETHING WRONG, NUMBER OF RESULTS != 1" << std::endl;
+                        countBadContainers++;
+		}
+	    }//for
+
+            cout << "End result: out of total = " << currentSampleCount << " bad were countBadContainers =" << countBadContainers << endl;
+    }//if
+    else{
+        cout << "currentSampleCount = 0 " << endl;
+    }
 
 }
 

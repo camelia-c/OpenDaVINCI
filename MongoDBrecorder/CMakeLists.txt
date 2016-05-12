@@ -1,5 +1,5 @@
-# datatriggerexample - Sample application
-# Copyright (C) 2015 Christian Berger
+# OpenDaVINCI - MongoDB recorder 
+# Copyright (C) 2016 Camelia Ciolac
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
